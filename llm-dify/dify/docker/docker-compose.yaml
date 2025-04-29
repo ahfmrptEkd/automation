@@ -1188,11 +1188,21 @@ services:
     container_name: dify-ollama
     ports:
       - "11434:11434"
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ollama_data:/root/.ollama
     networks:
       - dify-network
     restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 networks:
   # create a network between sandbox, api and ssrf_proxy, and can not access outside.
