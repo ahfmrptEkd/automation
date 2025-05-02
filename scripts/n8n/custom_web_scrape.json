@@ -82,12 +82,11 @@
             },
             {
               "id": "8fc4c448-ff3a-4a50-bee4-22187fe2f7d7",
-              "leftValue": "={{ $json.data }}",
-              "rightValue": "",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
               "operator": {
-                "type": "object",
-                "operation": "empty",
-                "singleValue": true
+                "type": "string",
+                "operation": "notEquals"
               }
             }
           ],
@@ -113,11 +112,42 @@
       "typeVersion": 1.1,
       "position": [
         620,
-        260
+        -200
       ],
       "id": "ba370fcc-901f-4c56-a100-4a0a54b65313",
       "name": "Wait",
       "webhookId": "0099536d-33be-4593-8e8f-1c5eafba4cb0"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/files/test_append.json",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "f51e5add-96f5-41c1-bc8b-be8fc61195c5",
+      "name": "Write"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "da394c90-150e-49d3-b2c6-1b5c38c14162",
+      "name": "Convert"
     }
   ],
   "pinData": {},
@@ -164,7 +194,13 @@
             "index": 0
           }
         ],
-        [],
+        [
+          {
+            "node": "Convert",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Wait",
@@ -184,13 +220,24 @@
           }
         ]
       ]
+    },
+    "Convert": {
+      "main": [
+        [
+          {
+            "node": "Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "8ea70c65-312e-479b-9a58-69f78b104cda",
+  "versionId": "475c6274-da91-4269-a340-8174f9820ffa",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2b4ed7dfcb91132677316e2039ab4208b50495cc22f00b696e79f47fa0da0790"
