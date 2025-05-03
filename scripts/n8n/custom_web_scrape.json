@@ -1,0 +1,247 @@
+{
+  "name": "custom web scrape",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"urls\": [\n      \"https://refactoring.guru/refactoring\"\n    ],\n    \"prompt\": \"You are an expert at extracting important information from software development documentation. Please extract the key content about code refactoring from the following page:1. Extract the page title and overall description accurately. 2. Identify each section and include: - Section title (e.g., \\\"When to refactor\\\", \\\"How to refactor\\\", etc.) - Section description/content - Key points or rules within the section 3. Structure list-type content as follows: - List item title/summary - Explanation/details for each item 4. Pay special attention to: - Refactoring rules such as \\\"Rule of Three\\\" - Guidelines on when to refactor (when adding features, fixing bugs, etc.) - Refactoring checklists - Characteristics of clean code 5. Identify the page' 's category and related tags. Structure the above information according to the provided schema, maintaining the meaning and nuance of the original text.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        0
+      ],
+      "id": "ea51bd5f-243e-4866-b46e-9b76c78d3b4a",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ER3jeh4oN3Tkd4Mp",
+          "name": "firecrawl"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "4a182751-3200-4dd2-8f4d-ff11e4eeaf30",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.firecrawl.dev/v1/extract/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "f9d08d1c-dbcb-47e1-84ab-479add253779",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ER3jeh4oN3Tkd4Mp",
+          "name": "firecrawl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "030adaeb-451f-447b-a95e-b81d6c4e6535",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8fc4c448-ff3a-4a50-bee4-22187fe2f7d7",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        620,
+        0
+      ],
+      "id": "d88a0c15-6adb-46ce-ab64-e1b9bc5e06ce",
+      "name": "If",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        -200
+      ],
+      "id": "ba370fcc-901f-4c56-a100-4a0a54b65313",
+      "name": "Wait",
+      "webhookId": "0099536d-33be-4593-8e8f-1c5eafba4cb0"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/files/test_append.json",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "f51e5add-96f5-41c1-bc8b-be8fc61195c5",
+      "name": "Write"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "da394c90-150e-49d3-b2c6-1b5c38c14162",
+      "name": "Convert"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert": {
+      "main": [
+        [
+          {
+            "node": "Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "475c6274-da91-4269-a340-8174f9820ffa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b4ed7dfcb91132677316e2039ab4208b50495cc22f00b696e79f47fa0da0790"
+  },
+  "id": "tEniJYllLtlH1HF7",
+  "tags": []
+}
