@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # n8n 워크플로우 자동화
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: llm-n8n
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=${N8N_DISABLE_PRODUCTION_MAIN_PROCESS:-false}
+      - NODE_ENV=${NODE_ENV:-production}
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
+      - DB_TYPE=${DB_TYPE:-sqlite}
+      - DB_SQLITE_PATH=${N8N_DATA_FOLDER:-/home/node/.n8n}/database.sqlite
+    volumes:
+      - n8n_data:${N8N_DATA_FOLDER:-/home/node/.n8n}
+      - ${N8N_FILES_PATH:-./files}:/files
+    networks:
+      - llm-network
+    restart: always
+
+  # Ollama - 로컬 AI 모델
+  ollama:
+    image: ollama/ollama:latest
+    container_name: llm-ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${OLLAMA_GPU_VISIBLE_DEVICES:-all}
+      - NVIDIA_DRIVER_CAPABILITIES=${OLLAMA_GPU_DRIVER_CAPABILITIES:-all}
+    volumes:
+      - ollama_data:${OLLAMA_DATA_PATH:-/root/.ollama}
+    networks:
+      - llm-network
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${OLLAMA_GPU_DEVICE_COUNT:-1}
+              capabilities: [gpu]
+
+networks:
+  llm-network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+    driver: local
+  ollama_data:
+    driver: local 
